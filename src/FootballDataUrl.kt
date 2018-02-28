@@ -1,57 +1,73 @@
 import java.net.URL
 import java.time.LocalDate
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 
-class FootballDataWrapper {
+class FootballDataWrapper(
+        private val apiKey: String = ""
+) {
 
-    private var url: String = "https://www.football-data.org/v1/"
+    private val url: String = "https://www.football-data.org/v1/"
+
+    private fun getResponse(url: String): String {
+        val myURL = URL(url)
+
+        myURL.openConnection().setRequestProperty("X-Auth-Token", this.apiKey)
+        myURL.openConnection().setRequestProperty("X-Response-Control", "full")
+
+        val buffer = BufferedReader(InputStreamReader(
+                myURL.openConnection().getInputStream()))
+
+        return buffer.readText()
+    }
 
     fun getFixtureFrom(from: String, to: String): String {
-        return URL(url + "fixtures?timeFrameStart=$from&timeFrameEnd=$to").readText()
+        return this.getResponse(url + "fixtures?timeFrameStart=$from&timeFrameEnd=$to")
     }
 
     fun getTodayFixtures(): String {
         val todayDate = LocalDate.now()
-        return URL(url + "fixtures?timeFrameStart=$todayDate&timeFrameEnd=$todayDate").readText()
+        return getResponse(url + "fixtures?timeFrameStart=$todayDate&timeFrameEnd=$todayDate")
     }
 
     fun getCompetitionTable(id: Int, matchDay: Int): String {
-        return URL(url + "competitions/$id/leagueTable/?matchday=$matchDay").readText()
+        return getResponse(url + "competitions/$id/leagueTable/?matchday=$matchDay")
     }
 
     fun getCompetitions(year: Int): String {
-        return URL(url + "competitions/?season=$year").readText()
+        return getResponse(url + "competitions/?season=$year")
     }
 
     fun getAllCompetions(): String {
-        return URL(url + "competitions").readText()
+        return getResponse(url + "competitions")
     }
 
     fun getCompetitionTeams(id: Int): String {
-        return URL(url + "competitions/$id/teams").readText()
+        return getResponse(url + "competitions/$id/teams")
     }
 
     fun getLeagueFixtures(id: Int, matchDay: Int, timeFrame: String): String {
-        return URL(url + "competitions/$id/fixtures/?matchday=$matchDay&timeFrame=$timeFrame").readText()
+        return getResponse(url + "competitions/$id/fixtures/?matchday=$matchDay&timeFrame=$timeFrame")
     }
 
     fun getFixture(id: Int, head: String): String {
-        return URL(url + "fixtures/$id/?head2head=$head").readText()
+        return getResponse(url + "fixtures/$id/?head2head=$head")
     }
 
     fun getFixturesOfSet(leagueCode: String = "", timeFrame: String = ""): String {
-        return URL(url + "fixtures/?leagueCode=$leagueCode&timeFrame=$timeFrame").readText()
+        return getResponse(url + "fixtures/?leagueCode=$leagueCode&timeFrame=$timeFrame")
     }
 
     fun getTeamFixtures(id: Int, season: String = "", timeFrame: String = "", venue: String = ""): String {
-        return URL(url + "teams/$id/fixtures/?season=$season&timeFrame=$timeFrame&venue=$venue").readText()
+        return getResponse(url + "teams/$id/fixtures/?season=$season&timeFrame=$timeFrame&venue=$venue")
     }
 
     fun getTeam(id: Int): String {
-        return URL(url + "teams/$id").readText()
+        return getResponse(url + "teams/$id")
     }
 
     fun getTeamPlayers(id: Int): String {
-        return URL(url + "teams/$id/players").readText()
+        return getResponse(url + "teams/$id/players")
     }
 }
